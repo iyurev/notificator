@@ -1,0 +1,16 @@
+GitLab project: {{ .Project.Name }}
+Description: {{ .Repository.Description }}
+URL: {{ .Repository.GitHTTPURL }}
+Ref: {{.Ref}}
+SHA: {{.CheckoutSHA}}
+Before: {{ .Before }}
+After: {{ .After }}
+
+Commit information:
+{{- range .Commits }}
+Commit link: {{.URL}}
+Commit message: {{.Message}}
+Author: {{.Author.Name}}
+Author email: {{ .Author.Email }}
+{{end}}
+
