@@ -1,0 +1,6 @@
+[telegram.myapp1]
+chatID = 123
+
+[telegram.myapp2]
+chatID = 321
+
