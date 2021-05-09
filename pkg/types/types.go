@@ -6,17 +6,21 @@ type Sender interface {
 
 type Event interface {
 	Msg(rt ReceiverType) ([]byte, error)
-	Receiver() *ReceiverRef
+	Recipient() *RecipientRef
 }
 
-type ReceiverRef struct {
+type RecipientRef struct {
 	Project string
 	Users   []string
 	Groups  []string
 }
 
-func NewReceiverRef(projectName string) *ReceiverRef {
-	return &ReceiverRef{
+func (r *RecipientRef) GetProjectName() string {
+	return r.Project
+}
+
+func NewReceiverRef(projectName string) *RecipientRef {
+	return &RecipientRef{
 		Project: projectName,
 	}
 }

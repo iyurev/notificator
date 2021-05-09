@@ -4,9 +4,8 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	eRR "github.com/iyurev/notificator/pkg/errors"
+	"github.com/iyurev/notificator/pkg/errors"
 	"github.com/iyurev/notificator/pkg/types"
 	"github.com/xanzy/go-gitlab"
 	"html/template"
@@ -22,12 +21,17 @@ const (
 //go:embed push_event_tg.tmpl
 var pushEventTmpl string
 
-type PushEvent struct {
-	Event gitlab.PushEvent
-	types.ReceiverRef
+type WHSvc struct {
+	S types.Sender
 }
 
-func WebHookHandler() gin.HandlerFunc {
+func NewWHSvc(sender types.Sender) *WHSvc {
+	return &WHSvc{
+		S: sender,
+	}
+}
+
+func (w *WHSvc) HookHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		if context.GetHeader(eventTypeHeader) != "" {
 			//Read request body
@@ -42,11 +46,9 @@ func WebHookHandler() gin.HandlerFunc {
 				if err != nil {
 					log.Println(err)
 				}
-				msg, err := pushEvent.Msg(types.TelegramReceiverType())
-				if err != nil {
+				if err := w.S.Send(pushEvent); err != nil {
 					log.Println(err)
 				}
-				fmt.Printf("MSG: %s\n", msg)
 			default:
 				log.Println("Unknown webhook type")
 			}
@@ -55,12 +57,20 @@ func WebHookHandler() gin.HandlerFunc {
 	}
 }
 
+type PushEvent struct {
+	Event gitlab.PushEvent
+}
+
 func NewPushEvent(raw []byte) (*PushEvent, error) {
 	pushEvent := &PushEvent{}
 	if err := json.Unmarshal(raw, &pushEvent.Event); err != nil {
 		return nil, err
 	}
 	return pushEvent, nil
+}
+
+func (pe *PushEvent) Recipient() *types.RecipientRef {
+	return types.NewReceiverRef("")
 }
 
 func (pe *PushEvent) TgMsg() ([]byte, error) {
@@ -87,6 +97,6 @@ func (pe *PushEvent) Msg(rt types.ReceiverType) ([]byte, error) {
 		}
 		return msg, nil
 	default:
-		return nil, eRR.UnknownReceiverType
+		return nil, errors.UnknownReceiverType
 	}
 }

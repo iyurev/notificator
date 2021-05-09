@@ -9,9 +9,9 @@ func TestNewGlobalConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_ = config
-	t.Logf("Global config: %v\n", globalConfig)
-	r, err := globalConfig.GetProjectRecipient("myapp2")
+
+	t.Logf("Global config: %v\n", config)
+	r, err := config.GetTgProjectRecipient("myapp2")
 	if err != nil {
 		t.Fatal(err)
 	}
