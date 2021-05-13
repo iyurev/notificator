@@ -1,6 +1,13 @@
 GitLab project: {{ .Project.Name }}
+{{- if .Repository }}
+{{- if .Repository.Description }}
 Description: {{ .Repository.Description }}
+{{- end }}
+{{- if .Project.Namespace }}
+Parent Namespace: {{ .Project.Namespace }}
+{{- end }}
 URL: {{ .Repository.GitHTTPURL }}
+{{- end }}
 Ref: {{.Ref}}
 SHA: {{.CheckoutSHA}}
 Before: {{ .Before }}
@@ -8,8 +15,8 @@ After: {{ .After }}
 
 Commit information:
 {{- range .Commits }}
-Commit link: {{.URL}}
-Commit message: {{.Message}}
+Link: {{.URL}}
+Message: {{.Message}}
 Author: {{.Author.Name}}
 Author email: {{ .Author.Email }}
 {{end}}

@@ -1,0 +1,1 @@
+{"type":"DELETE_ARTIFACT","occur_at":1620734551,"operator":"admin","event_data":{"resources":[{"digest":"sha256:5bb225d0840c70e5f57d9ae14f436374a8b432151714ae497cd38b8b98420c4e","tag":"test","resource_url":"core.harbor.domain/test-project/buildah:test"}],"repository":{"name":"buildah","namespace":"test-project","repo_full_name":"test-project/buildah","repo_type":"private"}}}

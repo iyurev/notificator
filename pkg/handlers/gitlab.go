@@ -1,4 +1,4 @@
-package gitlab
+package handlers
 
 import (
 	"bytes"
@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/iyurev/notificator/pkg/errors"
+	"github.com/iyurev/notificator/pkg/logger"
 	"github.com/iyurev/notificator/pkg/types"
 	"github.com/xanzy/go-gitlab"
+	"go.uber.org/zap"
 	"html/template"
 	"log"
 )
@@ -18,20 +20,26 @@ const (
 	administratorUserEmail = "Administrator@local"
 )
 
-//go:embed push_event_tg.tmpl
+//go:embed gitlab_push_event_tg.tmpl
 var pushEventTmpl string
 
-type WHSvc struct {
-	S types.Sender
+type GitLabSvc struct {
+	S   types.Sender
+	log *zap.Logger
 }
 
-func NewWHSvc(sender types.Sender) *WHSvc {
-	return &WHSvc{
-		S: sender,
+func NewGitLabSvc(sender types.Sender) (*GitLabSvc, error) {
+	gitlabSvcLogger, err := logger.New()
+	if err != nil {
+		return nil, err
 	}
+	return &GitLabSvc{
+		S:   sender,
+		log: gitlabSvcLogger.Named("gitlabHooksHandler"),
+	}, nil
 }
 
-func (w *WHSvc) HookHandler() gin.HandlerFunc {
+func (w *GitLabSvc) HookHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		if context.GetHeader(eventTypeHeader) != "" {
 			//Read request body
@@ -47,10 +55,10 @@ func (w *WHSvc) HookHandler() gin.HandlerFunc {
 					log.Println(err)
 				}
 				if err := w.S.Send(pushEvent); err != nil {
-					log.Println(err)
+					w.log.Error(err.Error())
 				}
 			default:
-				log.Println("Unknown webhook type")
+				w.log.Info("unknown gitlab webhook type")
 			}
 
 		}
@@ -70,7 +78,8 @@ func NewPushEvent(raw []byte) (*PushEvent, error) {
 }
 
 func (pe *PushEvent) Recipient() *types.RecipientRef {
-	return types.NewReceiverRef("")
+	recipientRef := types.NewReceiverRef(pe.Event.Project.Namespace)
+	return recipientRef
 }
 
 func (pe *PushEvent) TgMsg() ([]byte, error) {

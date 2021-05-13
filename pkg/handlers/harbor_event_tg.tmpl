@@ -1,0 +1,19 @@
+{{- if eq .Type  "DELETE_ARTIFACT" }}
+<b>Someone DELETE an artifact in the registry</b>
+{{- end }}
+{{- if eq .Type  "PUSH_ARTIFACT" }}
+<b>Someone PUSH an artifact in the registry</b>
+{{- end }}
+
+<b>Event type:</b>  {{ .Type }}
+<b>Username:</b>  {{ .Operator }}
+<b>Harbor project:</b>  {{ .EventData.Repository.Namespace }}
+<b>Repository:</b>  {{ .EventData.Repository.Name }}
+
+<b>Resources:</b>
+{{- range  .EventData.Resources }}
+<b>Link:</b>  {{ .ResourceURL }}
+<b>Tag:</b>  {{ .Tag }}
+<b>SHA:</b>  {{ .Digest }}
+{{- end }}
+
